@@ -1,8 +1,8 @@
 {
-  "name": "bring-github-old-feed-back",
-  "version": "0.1.4",
-  "description": "Replace GitHub new useless \"For You\" feed with the old \"Following\" one.",
-  "main": "dist/bring-github-old-feed-back.user.js",
+  "name": "unblock-economist",
+  "version": "0.1.5",
+  "description": "Unlock economist articles",
+  "main": "dist/unblock-economist.user.js",
   "files": [
     "dist"
   ],
@@ -16,9 +16,9 @@
     "github"
   ],
   "repository": {
-    "url": "https://github.com/SukkaW/bring-github-old-feed-back"
+    "url": "https://github.com/sinchang-codespaces/unblock-economist"
   },
-  "author": "SukkaW <https://skk.moe>",
+  "author": "Jeff Wen <https://sinchang.me>",
   "license": "MIT",
   "devDependencies": {
     "@swc/core": "^1.4.12",

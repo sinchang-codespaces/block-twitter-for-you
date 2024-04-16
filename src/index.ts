@@ -1,87 +1,65 @@
-import 'typed-query-selector';
+const loadCustomPage = () => {
+  const xhr = new XMLHttpRequest();
 
-const fetchDashboardFeedHtml = async () => {
-  const res = await fetch('https://github.com/dashboard-feed', {
-    headers: {
-      // With this header, GitHub will not return App Shell, only the content's HTML
-      'X-Requested-With': 'XMLHttpRequest'
-    }
-  });
-  return res.text();
-};
+  xhr.open('GET', window.location.href, true);
 
-/** create dom from html string */
-const stringToDOM = (html: string) => {
-  const t = document.createElement('template');
-  t.innerHTML = html;
-  return t.content.firstChild as HTMLElement;
-};
-
-(async () => {
-  const targetEl = document.querySelector('#dashboard > div > feed-container > div[data-target="feed-container.content"]');
-
-  /**
-   * Disable loading of the old feed, to save bandwidth
-   */
-  const ignoreForYouFeedFetch = (request: Request) => {
-    if (request.url === 'https://github.com/conduit/for_you_feed') {
-      return Promise.resolve(new Response('', { status: 204 }));
-    }
-    console.log({ request });
-    request.headers.append('X-Requested-With', 'XMLHttpRequest');
-    return window.fetch(request);
+  xhr.onerror = function () {
+    document.documentElement.innerHTML = 'Error getting Page!';
   };
 
-  let handle: number | null = null;
+  xhr.send();
 
-  const patchGithubIncludeFragmentElementFetch = () => {
-    if ('IncludeFragmentElement' in window) {
-      if (handle != null) {
-        window.cancelAnimationFrame(handle);
-        handle = null;
-      }
-
-      (window.IncludeFragmentElement as any).prototype.fetch = ignoreForYouFeedFetch;
+  xhr.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      document.documentElement.innerHTML = 'Removing the Subscription...';
+      removeSubscription(this.responseText);
+    } else if (this.readyState == 0) {
+      document.documentElement.innerHTML = 'Initiating the Request...';
+    } else if (this.readyState == 1) {
+      document.documentElement.innerHTML = 'Establishing the Server...';
+    } else if (this.readyState == 2) {
+      document.documentElement.innerHTML = 'Request Recieved...';
+    } else if (this.readyState == 3) {
+      document.documentElement.innerHTML = 'Processing the Request...';
     } else {
-      window.requestAnimationFrame(patchGithubIncludeFragmentElementFetch);
+      document.documentElement.innerHTML = 'Error Finding the Page!';
     }
   };
-  window.requestAnimationFrame(patchGithubIncludeFragmentElementFetch);
+};
 
-  if (targetEl) {
-    // refine-github's infinite-scroll feature is targetting `[role="tabpanel"]:not([hidden]) button.ajax-pagination-btn`
-    // Add the missing `role="tabpanel"` to the target element to make it work
-    targetEl.role = 'tabpanel';
+const removeSubscription = (htmlContentStr: string) => {
+  const wrapper = document.createElement('DIV');
+  wrapper.innerHTML = htmlContentStr;
 
-    // adjust margin
-    const contentEl = document.querySelector('div.feed-content');
-    if (contentEl) {
-      contentEl.style.maxWidth = 'calc(1440px + var(--feed-sidebar) + 48px)';
-    }
-    const mainEl = document.querySelector('div.feed-main');
-    if (mainEl) {
-      mainEl.style.maxWidth = '1440px';
-    }
+  const paywalls = wrapper.querySelectorAll('.paywall');
+  const subscriptions = wrapper.querySelectorAll('.subscription-benefits');
 
-    const oldDashboard = document.createElement('template');
-    oldDashboard.append(stringToDOM(`
-    <div class="text-center">
-      <picture>
-        <source srcset="https://github.githubassets.com/images/mona-loading-dark.gif" media="(prefers-color-scheme: dark)">
-        <source srcset="https://github.githubassets.com/images/mona-loading-default.gif" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
-        <img src="https://github.githubassets.com/images/mona-loading-default.gif" width="48" alt="Loading your activity..." class="mt-4 hide-reduced-motion">
-      </picture>
-      <picture>
-        <source srcset="https://github.githubassets.com/images/mona-loading-dark-static.svg" media="(prefers-color-scheme: dark)">
-        <source srcset="https://github.githubassets.com/images/mona-loading-default-static.svg" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
-        <img src="https://github.githubassets.com/images/mona-loading-default-static.svg" width="48" alt="Loading your activity..." class="mt-4 hide-no-pref-motion">
-      </picture>
-      <p class="color-fg-muted my-2">One moment please...</p>
-    </div>
-    `));
+  paywalls.forEach((paywall) => {
+    paywall.remove();
+  });
+  subscriptions.forEach((subscription) => {
+    subscription.remove();
+  });
 
-    targetEl.innerHTML = oldDashboard.innerHTML;
-    // Wait for the new dashboard to be loaded
-    targetEl.innerHTML = await fetchDashboardFeedHtml();
-  }
+  document.documentElement.innerHTML = 'Removing the Ads...';
+  removeAds(wrapper.innerHTML);
+};
+
+const removeAds = (htmlContentStr: string) => {
+  const wrapper = document.createElement('DIV');
+  wrapper.innerHTML = htmlContentStr;
+
+  const adverts = wrapper.querySelectorAll('.advert');
+  adverts.forEach((advert) => {
+    advert.remove();
+  });
+
+  putNewPage(wrapper);
+};
+
+const putNewPage = (pageHtml: HTMLElement) => {
+  document.documentElement.innerHTML = pageHtml.innerHTML;
+};
+(() => {
+  loadCustomPage();
 })();

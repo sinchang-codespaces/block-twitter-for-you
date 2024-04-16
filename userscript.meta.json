@@ -1,13 +1,9 @@
 {
-  "name": "Bring GitHub Old Feed Back",
-  "namespace": "https://skk.moe",
+  "name": "Unlock economist articles",
+  "namespace": "https://sinchang.me",
   "grant": ["none"],
   "run-at": "document-end",
-  "include": [
-    "https://github.com",
-    "https://github.com/",
-    "https://github.com/dashboard"
-  ],
-  "downloadURL": "https://cdn.jsdelivr.net/npm/bring-github-old-feed-back/dist/bring-github-old-feed-back.user.js",
-  "updateURL": "https://cdn.jsdelivr.net/npm/bring-github-old-feed-back/dist/bring-github-old-feed-back.meta.js"
+  "include": ["https://www.economist.com/*"],
+  "downloadURL": "https://cdn.jsdelivr.net/npm/unblock-economist/dist/unblock-economist.user.js",
+  "updateURL": "https://cdn.jsdelivr.net/npm/unblock-economist/dist/unblock-economist.meta.js"
 }
